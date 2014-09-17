@@ -4,6 +4,16 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "express": "4.x"
+    "express": "4.x",
+    "LiveScript": "1.x",
+    "mygrate": "",
+    "npm": "",
+    "ungit": "",
+    "pg": "",
+    "node-postgres-hstore": "",
+    "node-uuid": "",
+    "q": "",
+    "dustjs-linkedin": "",
+    "prelude-ls": ""
   }
 }

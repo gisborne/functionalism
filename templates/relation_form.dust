@@ -1,0 +1,7 @@
+<form action="/{model}" method="put">
+    <input type="hidden" name="id" value="{id}">
+    {#fields}
+        {.name} <input name="{.name}" type="{.type}" value="{.value}"><br>
+    {/fields}
+    <input type="submit">
+</form>
