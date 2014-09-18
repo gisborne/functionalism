@@ -7,38 +7,59 @@ require! pg
 require! hstore: 'node-postgres-hstore'
 require! Q: q
 require! path
+require! _: 'prelude-ls'
+
 pgTypes = pg.types
 
 constring = "postgres://gisborne:@localhost/functional"
 
-export params_query = (q, params, handle) ->
+with_connection = (handler) ->
   deferred = Q.defer()
 
   pg.connect constring, (err, client, done) ->
-    client.query q, params, (e, r) ->
-      console.error e; return if e
-      done
-      handle r
-      deferred.resolve()
+    handler err, client
+
+    done
+    deferred.resolve()
   deferred.promise
 
+export params_query = (q, params, handle) ->
+  with_connection (err, client) ->
+    client.query q, params, (e, r) ->
+      raise new Error e if e
+
+      handle r
 
 export quick_query = (q, handle) ->
-  deferred = Q.defer()
+  with_connection (err, client) ->
+    client.query q, (e, r) ->
+      raise new Error e if e
 
-  pg.connect constring, (err, client, done) ->
-    client.query q, [], (e, r) ->
-      console.error e if e
-      done
       handle r
-      deferred.resolve()
-  deferred.promise
+
+rowForInsert = (vals) ->
+  _.values(vals) * ',' + "\n"
+
+export quick_insert = (name, vals, succeed) ->
+
+  with_connection (err, client) ->
+    raise new Error e if e
+
+    stream = client.copyFrom "COPY #name (#{ks * ', '} FROM STDIN WITH CSV"
+    stream.on 'error', ->
+      raise new Error e
+
+    _.each ((h) ->
+        stream.write rowForInsert(h)),
+      vals
+    stream.end
 
 export get_relation = (name, handle) ->
   params_query "SELECT fields FROM relations WHERE name = $1", [name], handle
 
 
 
+/* required for hstore module */
 quick_query "SELECT oid FROM pg_type WHERE typname = 'hstore'", (r) ->
   export hstore_oid = r.rows[0].oid
   pgTypes.setTypeParser hstore_oid, hstore.parse
