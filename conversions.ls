@@ -37,12 +37,18 @@ getTemplateFromFile = (name) ->
     else
       throw new Error 'Template not found' unless f
 
-  templates[name] = dust.compileFn f
+  t = dust.compile f, name
+  dust.loadSource t
+
+getTemplate = (name) ->
+  templates['name'] || getTemplateFromFile name
 
 export renderTemplate = (name, vals, res) ->
-  t = (templates[name] || getTemplateFromFile name)
-  t vals, (err, out) ->
-    raise new Error err if err
+  vals.template = name + '.dust'
+  getTemplate name
+  getTemplate 'layout.dust'
+  dust.render name, vals, (err, out) ->
+    throw new Error err if err
     res out
 
 getFormVals = (model, fields, record) ->
