@@ -14,6 +14,9 @@
     "node-uuid": "",
     "q": "",
     "dustjs-linkedin": "",
-    "prelude-ls": ""
+    "prelude-ls": "",
+    "express-method-override": "",
+    "body-parser": "",
+    "csv-stringify": ""
   }
 }

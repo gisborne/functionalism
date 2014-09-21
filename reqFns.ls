@@ -10,6 +10,9 @@ require! './db'
 
 getFn = functionalism.getFn
 
+defaultFn = (rel, req) ->
+  getFn 'list'
+
 export get_path = (parts, req, res, next) ->
   model = parts[1]
   action = parts[2]
@@ -19,4 +22,4 @@ export get_path = (parts, req, res, next) ->
     if f
       f model, rel, req, res, next
     else
-      raise new Error 'Action not defined'
+      (defaultFn rel, req) model, rel, req, res, next

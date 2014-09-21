@@ -10,6 +10,7 @@ require! fs
 require! _: 'prelude-ls'
 require! path
 require! uuid: 'node-uuid'
+require! './db'
 
 define_fn = functionalism.define_fn
 resolve = path.resolve
@@ -65,14 +66,52 @@ getFormVals = (model, fields, record) ->
 
   result
 
+getColumnsFromRows = (r) ->
+  if r.rowCount > 0
+    _.keys r.rows[0].fields
+  else
+    []
+
+getColumnsNamesFromRows = (r) ->
+  if r.rowCount > 0
+    r.rows[0].fields
+  else
+    []
+
+keyValue = (chunk, context, bodies) ->
+  items = context.current()
+
+  for key in items
+    ctx = {"key" : key, "value" : items[key]};
+    chunk = chunk.render(bodies.block, context.push(ctx));
+
+  chunk
+
 /*
 Convert a relation to a form
 */
 
 define_fn 'D0B16C5A-40DC-40F0-9CE0-F7B692F4598D', {name: 'new'}, (model, rel, req, res, next) ->
-  fields = rel.rows[0].fields
+  fields = getColumnsNamesFromRows rel
   context = getFormVals model, fields
 
   renderTemplate 'relation_form', context, (result) ->
     res.send result
+
+explodeHash = (h) ->
+  _.map ((k) ->
+    {key: k, value: h[k]}),
+    _.keys h
+
+explodeRowValues = (rs) ->
+  _.map ((r) ->
+    _.values r.fields), rs
+
+define_fn '6FF4630A-523B-424F-B7FC-FA889C3F6FEF', {name: 'list'}, (model, rel, req, res, next) ->
+  db.query model, req, (r) ->
+    rows = explodeRowValues r.rows
+    cols = getColumnsFromRows rel
+    context = {columns: cols, rows: rows}
+    renderTemplate 'relation_table', context, (result) ->
+      res.send result
 

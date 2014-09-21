@@ -8,7 +8,8 @@ fns = {}
 fn_meta = {}
 
 export getFn = (name) ->
-  fns[name].fn
+  return fns[name].fn if fns[name]
+  void
 
 export getFnMeta = (f) ->
   fn_meta[f]
