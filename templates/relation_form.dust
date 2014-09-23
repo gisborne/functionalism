@@ -1,8 +1,10 @@
-<form action="/{model}" method="put">
-    <input type="hidden" name="id" value="{id}">
+<form action="/{model}" method="put" role="form">
+    <input type="hidden" name="id" id="id" value="{id}">
     <input type="hidden" name="_method" value="put">
     {#fields}
-        {.name} <input name="{.name}" type="{.type}" value="{.value}"><br>
+        <div class="form-group">
+        <label for="{.name}">{.name}</label><input name="{.name}" class="form-control" type="{.type}" value="{.value}" placeholder="Enter {.type}"><br>
+        </div>
     {/fields}
     <input type="submit">
 </form>

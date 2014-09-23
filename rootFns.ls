@@ -1,19 +1,18 @@
 /**
  * User: gisborne
- * Date: 9/15/14
- * Time: 22:36
+ * Date: 9/22/14
+ * Time: 22:22
  */
 
+require! './root'
 require! dust: 'dustjs-linkedin'
-require! './functionalism'
 require! fs
 require! _: 'prelude-ls'
 require! path
 require! './db'
 
-define_fn = functionalism.define_fn
+scope = root.scope
 resolve = path.resolve
-keys = _.keys
 
 types_map =
   'integer' => 'number'
@@ -59,7 +58,7 @@ getFormVals = (model, fields, record) ->
         result.fields ++= [{name: k, type: getInputType(fields[k]), value: record[k]}]
       else
         result.fields ++= [{name: k, type: getInputType(fields[k])}]),
-    _.Obj.keys(fields)
+    fields
 
   if record
     id = record.id
@@ -75,11 +74,8 @@ getColumnsFromRows = (r) ->
   else
     []
 
-getColumnsNamesFromRows = (r) ->
-  if r.rowCount > 0
-    r.rows[0].fields
-  else
-    []
+getColumnsNames = (r) ->
+    _.keys r
 
 keyValue = (chunk, context, bodies) ->
   items = context.current()
@@ -90,12 +86,8 @@ keyValue = (chunk, context, bodies) ->
 
   chunk
 
-/*
-Convert a relation to a form
-*/
-
-define_fn 'D0B16C5A-40DC-40F0-9CE0-F7B692F4598D', {name: 'new'}, (model, req, res, next) ->
-  fields = getColumnsNamesFromRows rel
+scope.defineFn 'D0B16C5A-40DC-40F0-9CE0-F7B692F4598D', {name: 'new'}, (model, fields, req, res, next) ->
+  fields = getColumnsNames fields
   context = getFormVals model, fields
 
   renderTemplate 'relation_form', context, (result) ->
@@ -110,11 +102,10 @@ explodeRowValues = (rs) ->
   _.map ((r) ->
     _.values r.fields), rs
 
-define_fn '6FF4630A-523B-424F-B7FC-FA889C3F6FEF', {name: 'list'}, (model, req, res, next) ->
+scope.defineFn '6FF4630A-523B-424F-B7FC-FA889C3F6FEF', {name: 'list'}, (model, fields, req, res, next) ->
   db.query model, req, (r) ->
     rows = explodeRowValues r.rows
-    cols = getColumnsFromRows rel
+    cols = getColumnsFromRows model
     context = {columns: cols, rows: rows}
     renderTemplate 'relation_table', context, (result) ->
       res.send result
-

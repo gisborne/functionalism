@@ -18,7 +18,7 @@ define_fn '78854229-BE57-48D8-BCDE-EED574560AFA', {name: 'create'}, (model, rel,
 
   vals['fields'] = hstore.stringify q
   db.quickInsertOne 'predicates', vals, ->
-    res.send hstore.stringify req.query
+    res.redirect 'new'
 
 export put_handler = (req, res, next) ->
   url = req.path
@@ -33,7 +33,3 @@ export put_handler = (req, res, next) ->
       f model, rel, req, res, next
     else
       throw new Error 'Action not defined'
-#    if f
-#      f model, rel, req, res, next
-#    else
-#      raise new Error 'Action not defined'

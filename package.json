@@ -17,6 +17,7 @@
     "prelude-ls": "",
     "express-method-override": "",
     "body-parser": "",
-    "csv-stringify": ""
+    "csv-stringify": "",
+    "serve-static": ""
   }
 }

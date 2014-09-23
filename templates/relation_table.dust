@@ -1,4 +1,5 @@
-<table>
+<div class="table-responsive">
+<table class="table table-striped table-hover table-condensed">
     <thead>
     <tr>
     {#columns}
@@ -16,3 +17,4 @@
     {/rows}
     </tbody>
 </table>
+</div>

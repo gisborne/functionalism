@@ -9,6 +9,9 @@ require! Q: q
 require! path
 require! _: 'prelude-ls'
 require! stringify: 'csv-stringify'
+require! dbM: './dbModel'
+
+dbModel = dbM.dbModel
 
 pgTypes = pg.types
 
@@ -38,7 +41,7 @@ export quick_query = (q, handle) ->
 
       handle r
 
-export get_relation = (name, handle) ->
+export getRelation = (name, handle) ->
   params_query "SELECT fields FROM relations WHERE name = $1", [name], handle
 
 export quickInsert = (name, vals, succeed) ->
@@ -69,6 +72,15 @@ export quickInsertOne = (name, vals, succeed) ->
 
 export query = (model, req, handler) ->
   quick_query "SELECT * FROM predicates WHERE name = '#model'", handler
+
+export getModelScope = (name) ->
+  handle: (method, parent_scope, url, req, res, next) ->
+    getRelation name, (r) ->
+      if r.rows.length > 0
+        model = new dbModel name, r.rows[0].fields
+        model.handle method, parent_scope, url, req, res, next
+      else
+        next method, parent_scope, url, req, res, next
 
 /* required for hstore module */
 quick_query "SELECT oid FROM pg_type WHERE typname = 'hstore'", (r) ->
