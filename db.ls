@@ -17,6 +17,9 @@ pgTypes = pg.types
 
 constring = "postgres://gisborne:@localhost/functional"
 
+#memoizing
+model_scopes = {}
+
 with_connection = (handler) ->
   deferred = Q.defer()
 
@@ -73,14 +76,21 @@ export quickInsertOne = (name, vals, succeed) ->
 export query = (model, req, handler) ->
   quick_query "SELECT * FROM predicates WHERE name = '#model'", handler
 
+
+#Create a scope object for a model declared in our database
+#We use model_scopes to memoize
 export getModelScope = (name) ->
   handle: (method, parent_scope, url, req, res, next) ->
-    getRelation name, (r) ->
-      if r.rows.length > 0
-        model = new dbModel name, r.rows[0].fields
-        model.handle method, parent_scope, url, req, res, next
-      else
-        next method, parent_scope, url, req, res, next
+    if (model = model_scopes[name])
+      model.handle method, parent_scope, url, req, res, next
+    else
+      getRelation name, (r) ->
+        if r.rows.length > 0
+          model = new dbModel name, r.rows[0].fields
+          model_scopes[name] = model
+          model.handle method, parent_scope, url, req, res, next
+        else
+          next method, parent_scope, url, req, res, next
 
 /* required for hstore module */
 quick_query "SELECT oid FROM pg_type WHERE typname = 'hstore'", (r) ->
