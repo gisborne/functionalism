@@ -48,3 +48,18 @@ handle = (method, url, req, res, next) ->
       throw new Error 'Unrecognized scope name: ' + next_scope_name
   else
     defaultHandle method, req, res, next #This is usually GET '/'
+
+scope.handle = (meth, _, url, req, res, next) ->
+    if meth == 'PUT'
+      method_name = 'create'
+    else #GET
+      if url.length > 0 && url[0] == 'new'
+        method_name = 'new'
+      else
+        method_name = 'list'
+
+    f = this.getFn method_name
+    if f
+      f @name, @fields, req, res, next
+    else
+      throw new Error 'Action not defined'
