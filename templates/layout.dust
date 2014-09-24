@@ -20,7 +20,6 @@
 {>"{template}" /}
 </div>
 <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
-<!--<script src="/require.js"></script>-->
 <script src="/uuid.js"></script>
 <script src="/prelude-browser-min.js"></script>
 <script src="/functionalism_client.js"></script>
