@@ -16,6 +16,7 @@ require! scp: './scope'
 export scope = new scp.scope
 
 require! './rootFns'
+require! './convertor'
 
 getMethod = (req) ->
   query = req.query
@@ -60,6 +61,7 @@ scope.handle = (meth, _, url, req, res, next) ->
 
     f = this.getFn method_name
     if f
-      f @name, @fields, req, res, next
+      f @name, @fields, req, res, next, (result) ->
+        convertor.toType result, 'html', res
     else
       throw new Error 'Action not defined'
