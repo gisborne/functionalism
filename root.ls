@@ -45,6 +45,6 @@ handle = (method, url, req, res, next) ->
 
     next_scope = getScope next_scope_name
     next_scope.handle method, scope, rest_url, req, res,  -> #next line is the "next" handler
-      defaultHandle method, req, res, next #This is probably Get '/'
+      throw new Error 'Unrecognized scope name: ' + next_scope_name
   else
-    defaultHandle method, req, res, next
+    defaultHandle method, req, res, next #This is usually GET '/'
