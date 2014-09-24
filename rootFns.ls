@@ -69,8 +69,8 @@ getFormVals = (model, fields, record) ->
   result
 
 getColumnsFromRows = (r) ->
-  if r.rowCount > 0
-    _.keys r.rows[0].fields
+  if r.length > 0
+    _.keys r[0].fields
   else
     []
 
@@ -104,8 +104,9 @@ explodeRowValues = (rs) ->
 
 scope.defineFn '6FF4630A-523B-424F-B7FC-FA889C3F6FEF', {name: 'list'}, (model, fields, req, res, next) ->
   db.query model, req, (r) ->
-    rows = explodeRowValues r.rows
-    cols = getColumnsFromRows model
+    rs = r.rows
+    rows = explodeRowValues rs
+    cols = getColumnsFromRows rs
     context = {columns: cols, rows: rows}
     renderTemplate 'relation_table', context, (result) ->
       res.send result
