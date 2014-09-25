@@ -14,5 +14,7 @@ export dbModel = (name, fields) ->
 
   @__proto__ = root.scope
 
+  this.defineFn 'C51484BA-E62D-49C6-9227-4ED4C0156FF5', {name: 'sort'}, (model, fields, req, res, next, handle) ->
+
   this
 

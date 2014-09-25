@@ -64,7 +64,7 @@ scope.defineFn 'E668EC95-0896-4AD1-8DF6-14ECB59CAB93', {name: 'create'}, (model,
 
   vals['fields'] = hstore.stringify q
   db.quickInsertOne 'predicates', vals, ->
-    res.redirect "#{model}/new"
+    scope.call 'after create' model, fields, req, res, next, handle
 
 
 scope.defineFn 'D0B16C5A-40DC-40F0-9CE0-F7B692F4598D', {name: 'new'}, (model, fields, req, res, next, handle) ->
@@ -79,3 +79,7 @@ scope.defineFn '6FF4630A-523B-424F-B7FC-FA889C3F6FEF', {name: 'list'}, (model, f
     cols = getColumnsFromRows rs
     result = tableValue.create cols, rows
     handle result
+
+
+scope.defineFn '1F82437F-6776-42BD-940E-826F8CA0AB70', {name: 'after create'}, (model, fields, req, res, next, handle) ->
+  res.redirect "#{model}/new"
