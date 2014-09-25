@@ -1,0 +1,29 @@
+{
+  "development": {
+    "mygrate": {
+      "minHookDate": "999999999999"
+    },
+    "postgresql": {
+      "host": "localhost",
+      "database": "functional_dev",
+      "user": "functional_dev_user",
+      "password": "dev"
+    }
+  },
+  "test": {
+    "postgresql": {
+      "host": "localhost",
+      "database": "functional_test",
+      "user": "functional_test_user",
+      "password": "test"
+    }
+  },
+  "production": {
+    "postgresql": {
+      "host": "localhost",
+      "database": "functional_prod",
+      "user": "functional_prod_user",
+      "password": "prod"
+    }
+  }
+}
