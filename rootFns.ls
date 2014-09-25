@@ -9,6 +9,7 @@ require! _: 'prelude-ls'
 require! './db'
 require! './tableValue'
 require! './formValue'
+require! hstore: 'node-postgres-hstore'
 
 scope = root.scope
 
@@ -54,6 +55,16 @@ explodeRowValues = (rs) ->
   _.map ((r) ->
     _.values r.fields), rs
 
+
+scope.defineFn 'E668EC95-0896-4AD1-8DF6-14ECB59CAB93', {name: 'create'}, (model, fields, req, res, next, handle) ->
+  q = req.query
+  vals = {id: q.id, name: model}
+  delete q.id
+  delete q._method
+
+  vals['fields'] = hstore.stringify q
+  db.quickInsertOne 'predicates', vals, ->
+    res.redirect "#{model}/new"
 
 
 scope.defineFn 'D0B16C5A-40DC-40F0-9CE0-F7B692F4598D', {name: 'new'}, (model, fields, req, res, next, handle) ->
