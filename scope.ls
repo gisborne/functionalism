@@ -4,6 +4,7 @@
  * Time: 0:09
  */
 require! _: 'prelude-ls'
+require! './convertor'
 
 export scope = ->
   @fns = {}
@@ -29,8 +30,29 @@ export scope = ->
       name: name
       id:   id
 
-  @call = (name) ->
+  @callFn = (name) ->
     args = Array.prototype.slice.call(arguments, 1)
     f = this.getFn name
-    f.apply args
+    f.apply this, args
+
+  @handle = (r) ->
+    url = r.url
+    meth = r.method
+    res = r.res
+
+    if meth.toLowerCase() == 'put'
+      method_name = 'create'
+    else #GET
+      if url.length > 0 && url[0].toLowerCase() == 'new'
+        method_name = 'new'
+      else
+        method_name = 'list'
+
+    f = this.getFn method_name
+    if f
+      f.call this, r, (result) ->
+        convertor.toType result, 'html', res
+    else
+      throw new Error 'Action not defined'
+
   this

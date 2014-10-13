@@ -56,30 +56,33 @@ explodeRowValues = (rs) ->
     _.values r.fields), rs
 
 
-scope.defineFn 'E668EC95-0896-4AD1-8DF6-14ECB59CAB93', {name: 'create'}, (model, fields, req, res, next, handle) ->
+scope.defineFn 'E668EC95-0896-4AD1-8DF6-14ECB59CAB93', {name: 'create'}, (r) ->
+  req = r.req
+  model = r.model
   q = req.query
+
   vals = {id: q.id, name: model}
   delete q.id
   delete q._method
 
   vals['fields'] = hstore.stringify q
   db.quickInsertOne 'predicates', vals, ->
-    scope.call 'after create' model, fields, req, res, next, handle
+    scope.callFn 'after create' r
 
 
-scope.defineFn 'D0B16C5A-40DC-40F0-9CE0-F7B692F4598D', {name: 'new'}, (model, fields, req, res, next, handle) ->
-  result = getFormVals(model, fields)
+scope.defineFn 'D0B16C5A-40DC-40F0-9CE0-F7B692F4598D', {name: 'new'}, (r, handle) ->
+  result = getFormVals(r.model_name, @fields)
   handle result
 
 
-scope.defineFn '6FF4630A-523B-424F-B7FC-FA889C3F6FEF', {name: 'list'}, (model, fields, req, res, next, handle) ->
-  db.query model, req, (r) ->
-    rs = r.rows
+scope.defineFn '6FF4630A-523B-424F-B7FC-FA889C3F6FEF', {name: 'list'}, (r, handle) ->
+  db.query r.model_name, r.req, (result) ->
+    rs = result.rows
     rows = explodeRowValues rs
     cols = getColumnsFromRows rs
     result = tableValue.create cols, rows
     handle result
 
 
-scope.defineFn '1F82437F-6776-42BD-940E-826F8CA0AB70', {name: 'after create'}, (model, fields, req, res, next, handle) ->
-  res.redirect "#{model}/new"
+scope.defineFn '1F82437F-6776-42BD-940E-826F8CA0AB70', {name: 'after create'}, (r, _) ->
+  r.res.redirect "new"

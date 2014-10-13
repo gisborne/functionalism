@@ -80,17 +80,19 @@ export query = (model, req, handler) ->
 #Create a scope object for a model declared in our database
 #We use model_scopes to memoize
 export getModelScope = (name) ->
-  handle: (method, parent_scope, url, req, res, next) ->
+  handle: (r) ->
+    r.model_name = name
     if (model = model_scopes[name])
-      model.handle method, parent_scope, url, req, res, next
+      model.handle r
     else
-      getRelation name, (r) ->
-        if r.rows.length > 0
-          model = new dbModel name, r.rows[0].fields
+      getRelation name, (result) ->
+        rows = result.rows
+        if rows.length > 0
+          model = new dbModel name, rows[0].fields
           model_scopes[name] = model
-          model.handle method, parent_scope, url, req, res, next
+          model.handle r
         else
-          next method, parent_scope, url, req, res, next
+          r.call_next
 
 /* required for hstore module */
 quick_query "SELECT oid FROM pg_type WHERE typname = 'hstore'", (r) ->

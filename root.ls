@@ -16,7 +16,7 @@ require! scp: './scope'
 export scope = new scp.scope
 
 require! './rootFns'
-require! './convertor'
+require! './request'
 
 getMethod = (req) ->
   if (method = req.query['_method']) && method.match(/put/i)
@@ -24,8 +24,7 @@ getMethod = (req) ->
   else
     req.method
 
-getScope = (name) ->
-  db.getModelScope name
+getScope = db.getModelScope
 
 
 export rootHandle = (req, res, next) ->
@@ -35,33 +34,25 @@ export rootHandle = (req, res, next) ->
   url_parts = url.split '/' |> _.tail #We throw away the inevitable blank before the opening /
   handle method, url_parts, req, res, next
 
+#GET '/' is probably the only case of this
+defaultHandle = (r) ->
+    r.res.send 'foo ' + r.req.url #ToDo What do we do with GET '/'?
 
-defaultHandle = (method, req, res, next) ->
-    res.send 'foo ' + req.url #ToDo What do we do with GET '/'?
-
+#Polish request details up for standard handle call
 handle = (method, url, req, res, next) ->
   next_scope_name = _.head url
+  r = request.create(
+    method: method
+    req:    req
+    res:    res
+    next:   next
+  )
+
   if next_scope_name !== ''
-    rest_url = _.tail url
+    r.url = _.tail url
 
     next_scope = getScope next_scope_name
-    next_scope.handle method, scope, rest_url, req, res,  -> #next line is the "next" handler
+    next_scope.handle r, -> #method, scope, rest_url, req, res,  -> #next line is the "next" handler
       throw new Error 'Unrecognized scope name: ' + next_scope_name
   else
-    defaultHandle method, req, res, next #This is usually GET '/'
-
-scope.handle = (meth, _, url, req, res, next) ->
-    if meth.toLowerCase() == 'put'
-      method_name = 'create'
-    else #GET
-      if url.length > 0 && url[0].toLowerCase() == 'new'
-        method_name = 'new'
-      else
-        method_name = 'list'
-
-    f = this.getFn method_name
-    if f
-      f @name, @fields, req, res, next, (result) ->
-        convertor.toType result, 'html', res
-    else
-      throw new Error 'Action not defined'
+    defaultHandle r #This is usually GET '/'

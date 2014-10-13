@@ -14,7 +14,21 @@ export dbModel = (name, fields) ->
 
   @__proto__ = root.scope
 
-  this.defineFn 'C51484BA-E62D-49C6-9227-4ED4C0156FF5', {name: 'sort'}, (model, fields, req, res, next, handle) ->
+  type_wrap_function_names =
+    integer:  'INTEGER'
+    float:    'FLOAT'
+
+  @getFieldForQuery = (name) ->
+    type = @fields[name]
+    raise new Error 'unrecognized field name in getFieldForQuery' unless type
+    f = type_wrap_function_names[name.toLowerCase()]
+    if f
+      "name::#f"
+    else
+      name
+
+
+  this.defineFn 'C51484BA-E62D-49C6-9227-4ED4C0156FF5', {name: 'sort'}, (r) ->
 
   this
 
